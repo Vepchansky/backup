@@ -1,0 +1,50 @@
+{% extends 'coderedcms/blocks/base_block.html' %}
+
+{% load wagtailcore_tags wagtailimages_tags coderedcms_tags lazyimages_tags %}
+
+{% block block_render %}
+
+{% generate_random_id as modal_id %}
+<a href="#" data-toggle="modal" data-target="#{{modal_id}}" role="button" >
+
+<div class="card mb-3 {{self.settings.custom_css_class}}"
+{% if self.settings.custom_id %}id="{{self.settings.custom_id}}"{% endif %}>
+    {% if self.image %}
+    {% lazy_image self.image fill-900x600 as card_img %}
+    <img class="lazy card-img-top w-100" data-src="{{card_img.url}}" src="{{card_img.lazy_url}}" alt="{{card_img.alt}}">
+    {% endif %}
+    <div class="card-body">
+        {% if self.title %}<h5 class="card-title">{{self.title}}</h5>{% endif %}
+        {% if self.subtitle %}<h6 class="card-subtitle mb-2 text-muted">{{self.subtitle}}</h6>{% endif %}
+    </div>
+</div>
+</a>
+
+
+<div id="{{modal_id}}" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+      <div class="modal-header">
+        {% if self.header %}
+        <h5 class="modal-title">{% include_block self.header %}</h5>
+        {% endif %}
+        <button type="button" class="close modal-close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+          {% include_block self.content %}
+      </div>
+
+      {% if self.footer %}
+      <div class="modal-footer">
+          {% include_block self.footer %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+# project_name1name_host1
+
+server {
+    server_name     name_host;
+    charset     utf-8;
+
+    client_max_body_size 75M;
+
+    location /media  {
+        alias /opt/projects/project_name/project_name/media;
+    }
+
+    location /static {
+        alias /opt/projects/project_name/project_name/static;
+
+    }
+
+    location / {
+        uwsgi_pass  unix:///opt/projects/project_name/project_name/project_name.sock;
+        include     /opt/projects/project_name/project_name/deployment/uwsgi_params;
+    }
+
+}
+# project_name2name_host2

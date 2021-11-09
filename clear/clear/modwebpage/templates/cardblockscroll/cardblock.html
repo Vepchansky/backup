@@ -1,0 +1,28 @@
+{% load wagtailcore_tags wagtailimages_tags lazyimages_tags coderedcms_tags %}
+
+
+
+<div class="container posrel">
+
+<div class="swiper-container{{self.number}} customswiper">
+  <div class="swiper-wrapper">
+
+{% for slide in self.body %}
+{% block card %}
+{% endblock %}
+{% endfor %}
+
+  </div>
+<!-- If we need pagination -->
+  <div class="swiper-pagination"></div>
+
+</div>
+  <!-- If we need navigation buttons -->
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-button-next"></div>
+</div>
+
+{% for slide in self.body %}
+{% block modal %}
+{% endblock %}
+{% endfor %}

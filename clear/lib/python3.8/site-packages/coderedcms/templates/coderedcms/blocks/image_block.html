@@ -1,0 +1,20 @@
+{% load wagtailimages_tags lazyimages_tags %}
+
+{% lazy_image self.image max-1000x1000 as self_image %}
+
+{% if format == 'amp' %}
+
+<amp-img src="{{self_image.url}}"
+layout="responsive" width="{{self_image.width}}" height="{{self_image.height}}"
+class="{{self.settings.custom_css_class}}"
+{% if self.settings.custom_id %}id="{{self.settings.custom_id}}"{% endif %}
+alt="{{self_image.image.title}}"></amp-img>
+
+{% else %}
+
+<img data-src="{{self_image.url}}" src="{{self_image.lazy_url}}"
+class="lazy w-100 {{self.settings.custom_css_class}}"
+{% if self.settings.custom_id %}id="{{self.settings.custom_id}}"{% endif %}
+alt="{{self_image.image.alt}}" />
+
+{% endif %}

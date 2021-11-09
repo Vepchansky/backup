@@ -1,0 +1,30 @@
+.card-custom-general {
+    
+}
+
+.card-custom-general button {
+
+}
+
+.card-custom-general h2 {
+
+}
+ 
+.card-custom-general .card-header {
+    background-color: yellow;
+}
+
+.card-custom-general .card-header p {
+    color: blue;
+
+}
+
+.card-custom-general .card-body {
+    background-color: grey;
+
+}
+
+.card-custom-general .card-body p {
+    color: black;
+
+}

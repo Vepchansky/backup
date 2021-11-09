@@ -1,0 +1,56 @@
+{% load wagtailcore_tags wagtailimages_tags coderedcms_tags %}
+
+{% get_pictures self.collection.id as pictures %}
+{% generate_random_id as modal_id %}
+
+<section class="{{self.settings.custom_css_class}}"
+    {% if self.settings.custom_id %}id="{{self.settings.custom_id}}"{% endif %}>
+
+<div class="row">
+{% for picture in pictures %}
+    {% image picture fill-900x600 as picture_image %}
+    {% image picture original as original_image %}
+
+    {# insert a break every 4 columns #}
+    {% cycle '' '' '' '' '<div class="w-100"></div>' %}
+
+    <div class="col-sm my-3">
+        <a href="#" class="lightbox-preview" data-toggle="modal" data-target="#modal-{{modal_id}}">
+        <img class="thumbnail w-100" src="{{picture_image.url}}" alt="{{picture_image.image.title}}" title="{{picture_image.image.title}}" />
+        </a>
+    </div>
+
+{% endfor %}
+</div>
+
+<div id="modal-{{modal_id}}" class="modal fade and carousel slide" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+            <div class="modal-content">
+        <div class="modal-body">
+
+
+                <div class="carousel-inner">
+                {% for item in pictures %}
+                {% image item original as original_image %}
+                <div class="carousel-item {% if forloop.counter0 == 0 %}active{% endif %}">
+                        <img class="d-block w-100" src="{{original_image.url}}"  />
+                </div>
+                {% endfor %}
+                </div>
+
+
+            <a class="carousel-control-prev" href="#modal-{{modal_id}}" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#modal-{{modal_id}}" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+</section>

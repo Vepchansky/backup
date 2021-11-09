@@ -1,0 +1,34 @@
+#!/bin/bash
+
+apt-get update && apt-get upgrade
+apt-get install libpq-dev postgresql postgresql-contrib nginx python3-pip
+apt install snapd
+snap install core
+snap refresh core
+snap install --classic certbot
+ln -s /snap/bin/certbot /usr/bin/certbot
+cp Full_install/emperor.uwsgi.service /etc/systemd/system/.
+/etc/init.d/nginx start
+systemctl enable emperor.uwsgi.service
+systemctl enable nginx.service
+systemctl start emperor.uwsgi.service
+pip3 install virtualenv psycopg2 uwsgi
+mkdir /etc/uwsgi
+mkdir /etc/uwsgi/vassals
+mkdir /var/log/uwsgi
+
+command_psql="psql -c \"create user evgen with password 'qwerty';\""
+command_psql2="psql -c \"UPDATE pg_database SET datistemplate = FALSE WHERE datname = 'template1';\""
+command_psql3="psql -c \"DROP DATABASE Template1;\""
+command_psql4="psql -c \"CREATE DATABASE template1 WITH owner=postgres \
+ENCODING = 'UTF-8' lc_collate = 'en_US.utf8' lc_ctype = 'en_US.utf8' template template0;\""
+command_psql5="psql -c \"UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template1';\""
+su - postgres -c "$command_psql"
+su - postgres -c "$command_psql2"
+su - postgres -c "$command_psql3"
+su - postgres -c "$command_psql4"
+su - postgres -c "$command_psql5"
+
+cat templates/temp_default.txt > /etc/nginx/sites-enabled/default
+
+echo "colorscheme blue" > ~/vimrc

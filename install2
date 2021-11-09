@@ -1,0 +1,117 @@
+#!/bin/bash
+
+BASE_DIR=$(pwd)
+
+echo " Для выхода вводите \"n\" \n"
+
+read -p " Введите название проекта для восстановления: " proj
+read -p " Введите IP сервера проекта: " server
+
+backups = $(ssh admin@92.63.102.118 "ls -l backups/${server}/" | awk '{print $9}') &
+echo " Доступные бэкапы:"
+echo $backups
+mkdir $BASE_DIR/backup_temp
+read -p " Введите дату выбранного бэкапа согласно маске YYYY-MM-DD: " date_back
+
+scp admin@92.63.102.118:/backups/${server}/backup-${date_back}.tar.gz $BASE_DIR/backup_temp/. &
+
+
+
+
+if [[ "$proj" =~ ^[nN]$ ]]; then
+       echo " Выход "
+       exit
+else
+
+virtualenv /opt/projects/$proj
+source /opt/projects/$proj/bin/activate
+python -m pip install --upgrade pip
+pip install -r $BASE_DIR/requirements1.txt
+
+cd /opt/projects/$proj
+coderedcms start $proj
+cd $BASE_DIR
+mkdir /opt/projects/$proj/$proj/media
+mkdir /opt/projects/$proj/$proj/deployment
+cp $BASE_DIR/yesanswer /opt/projects/$proj/$proj/.
+
+# СОЗДАНИЕ ПРИЛОЖЕНИЯ ДЛЯ КАСТОМНЫХ МОДУЛЕЙ И НАСТРОЙКА ИХ
+
+cd /opt/projects/$proj/$proj/
+python manage.py startapp modwebpage
+cp $BASE_DIR/clear/clear/modwebpage/models.py /opt/projects/$proj/$proj/modwebpage/.
+cp $BASE_DIR/clear/clear/modwebpage/blocks.py /opt/projects/$proj/$proj/modwebpage/.
+cp -r $BASE_DIR/clear/clear/modwebpage/templates /opt/projects/$proj/$proj/modwebpage/.
+
+# НАСТРОЙКА ШАБЛОНОВ И СТИЛЕЙ СТРАНИЦ И КАСТОМНЫХ БЛОКОВ
+
+cp $BASE_DIR/clear/clear/website/templates/coderedcms/pages/base.html /opt/projects/$proj/$proj/website/templates/coderedcms/pages/.
+cp $BASE_DIR/clear/clear/website/static/website/css/genstyle.css /opt/projects/$proj/$proj/website/static/website/css/.
+cp $BASE_DIR/clear/clear/website/static/website/css/scroll_style.css /opt/projects/$proj/$proj/website/static/website/css/.
+cp $BASE_DIR/clear/clear/website/static/website/css/choise_style.css /opt/projects/$proj/$proj/website/static/website/css/.
+cp -r $BASE_DIR/clear/lib/python3.8/site-packages/coderedcms/templates /opt/projects/$proj/lib/python3.8/site-packages/coderedcms/.
+
+cp $BASE_DIR/Full_install/wagtailsettings_models.py /opt/projects/$proj/lib/python3.8/site-packages/coderedcms/models/.
+python manage.py collectstatic
+
+deactivate
+
+cd $BASE_DIR
+
+
+
+# НАСТРОЙКА UWSGI-vassals ПРОЕКТА
+
+cp $BASE_DIR/uwsgi_params /opt/projects/$proj/$proj/deployment/.
+python3 $BASE_DIR/uwsgi_settings.py $proj
+touch /var/log/uwsgi/${proj}.log
+
+# НАСТРОЙКА ALLOWED_HOSTS
+
+python3 $BASE_DIR/allowed.py $proj
+
+# НАСТРОЙКА NGINX
+
+python3 $BASE_DIR/nginx_repack.py $proj
+
+# СОЗДАНИЕ БАЗЫ ДАННЫХ И ПРИВЯЗКА ЕЕ К ПРОЕКТУ
+
+command_psql="psql -c \"create database $proj owner 'evgen';\""
+su - postgres -c "$command_psql"
+python3 $BASE_DIR/base_repack.py $proj
+
+# Копирование файлов бэкапа проекта в резерв
+
+cd $BASE_DIR/backup_temp
+tar zxf backup-${date_back}.tar.gz
+rm backup-${date_back}.tar.gz
+cp opt/backup/${proj}-${date_back}.dump /var/lib/postgresql/.
+command_psql="psql ${proj} < ${proj}-${date_back}.dump"
+su - postgres -c "$command_psql"
+
+cp opt/backstatic/${proj}-static/* /opt/projects/${proj}/${proj}/website/static/website/css/.
+cp -r opt/backmedia/${proj}-media/* /opt/projects/${proj}/${proj}/media/.
+
+
+# Смена урла админки
+
+python3 enter12_setup.py $proj
+
+# Удаление django-admin из urls.py
+
+sed -i "/django-admin/d" /opt/projects/$proj/$proj/$proj/urls.py
+
+# Миграция 
+
+cd /opt/projects/$proj
+source bin/activate
+cd $proj
+python manage.py makemigrations
+python manage.py migrate
+cd $BASE_DIR
+
+deactivate
+
+systemctl restart emperor.uwsgi.service
+systemctl restart nginx.service
+fi

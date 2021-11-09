@@ -1,0 +1,27 @@
+.card.mb-3.swiper-slide.card-custom-card a {
+    text-decoration: none !important;
+}
+
+.card-img-top.w-100.card-custom-img {
+}
+
+.card-body.card-custom-body {
+    background-color: yellow;
+}
+
+.card-title.card-custom-title {
+    color: black;
+}
+
+.card-subtitle.mb-2.text-muted.card-custom-subtitle {
+}
+
+.card-text.card-custom-text {
+    color: black;
+}
+
+.card-text.card-custom-text p {
+}
+
+
+

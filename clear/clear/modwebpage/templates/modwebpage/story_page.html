@@ -1,0 +1,18 @@
+{% extends "wagtail_webstories/base_web_story_page.html" %}
+
+{% load wagtailcore_tags wagtailimages_tags coderedcms_tags lazyimages_tags %}
+
+{% block vlad_content %}
+{% for card in self.body %}
+{% generate_random_id as card_id %}
+	<amp-story-page id="{{ card_id }}">
+		<amp-story-grid-layer template="fill">
+			{% lazy_image card.value.image fill-452x680 class="lazy" %}
+		</amp-story-grid-layer>
+		<amp-story-grid-layer template="thirds">
+			<h1 style="color:white;">{{ card.value.title }}</h1>
+			<q style="color:white;" grid-area="lower-third">{{ card.value.text }}</q>
+		</amp-story-grid-layer>
+	</amp-story-page>	
+{% endfor %}
+{% endblock %}

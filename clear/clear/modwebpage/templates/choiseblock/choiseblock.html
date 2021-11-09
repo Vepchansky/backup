@@ -1,0 +1,32 @@
+{% extends 'coderedcms/blocks/base_block.html' %}
+
+{% load wagtailcore_tags wagtailimages_tags coderedcms_tags %}
+
+{% block block_render %}
+
+{% generate_random_id as accordion_id %}
+
+<div class="accordion" id="{{ accordion_id }}">
+{% for a in self.body %}
+{% generate_random_id as choise_id %}
+{% generate_random_id as collapse_id %}
+  <div class="card card-custom-general">
+    <div class="card-header" id="{{ choise_id }}">
+      <h2 class="mb-0">
+        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#{{collapse_id}}" aria-expanded="true" aria-controls="{{collapse_id}}">
+          {{ a.value.choise }}
+        </button>
+      </h2>
+    </div>
+
+    <div id="{{collapse_id}}" class="collapse" aria-labelledby="{{ choise_id }}" data-parent="#{{ accordion_id }}">
+      <div class="card-body">
+        {{ a.value.answer }}
+      </div>
+	{{ a.value.HTML }}
+    </div>
+  </div>
+{% endfor %}
+</div>
+
+{% endblock %}
