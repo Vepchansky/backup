@@ -31,4 +31,4 @@ su - postgres -c "$command_psql5"
 
 cat templates/temp_default.txt > /etc/nginx/sites-enabled/default
 
-echo "colorscheme blue" > ~/vimrc
+echo "colorscheme blue" > ~/.vimrc
