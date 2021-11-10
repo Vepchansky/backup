@@ -9,7 +9,7 @@ if [[ "$server" =~ ^[nN]$ ]]; then
        exit
 fi
 
-backups = $(ssh admin@92.63.102.118 "ls -l backups/${server}/" | awk '{print $9}') 
+backups=$(ssh admin@92.63.102.118 "ls -l backups/${server}/" | awk '{print $9}') 
 echo "Доступные бэкапы:"
 echo $backups
 
