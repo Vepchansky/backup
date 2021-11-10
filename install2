@@ -24,7 +24,7 @@ else
 mkdir $BASE_DIR/backup_temp
 read -p "Введите дату выбранного бэкапа согласно маске YYYY-MM-DD: " date_back
 
-scp admin@92.63.102.118:/backups/${server}/backup-${date_back}.tar.gz $BASE_DIR/backup_temp/. &
+scp admin@92.63.102.118:/backups/${server}/backup-${date_back}.tar.gz $BASE_DIR/backup_temp/. &&
 virtualenv /opt/projects/$proj
 source /opt/projects/$proj/bin/activate
 python -m pip install --upgrade pip
