@@ -2,27 +2,29 @@
 
 BASE_DIR=$(pwd)
 
-echo " Для выхода вводите \"n\" \n"
+echo "Для выхода вводите \"n\" \n"
+read -p "Введите IP сервера проекта: " server
+if [[ "$server" =~ ^[nN]$ ]]; then
+       echo " Выход "
+       exit
+fi
 
-read -p " Введите название проекта для восстановления: " proj
-read -p " Введите IP сервера проекта: " server
-
-backups = $(ssh admin@92.63.102.118 "ls -l backups/${server}/" | awk '{print $9}') &
-echo " Доступные бэкапы:"
+backups = $(ssh admin@92.63.102.118 "ls -l backups/${server}/" | awk '{print $9}') 
+echo "Доступные бэкапы:"
 echo $backups
-mkdir $BASE_DIR/backup_temp
-read -p " Введите дату выбранного бэкапа согласно маске YYYY-MM-DD: " date_back
 
-scp admin@92.63.102.118:/backups/${server}/backup-${date_back}.tar.gz $BASE_DIR/backup_temp/. &
-
-
-
-
+read -p "Введите название проекта для восстановления: " proj
 if [[ "$proj" =~ ^[nN]$ ]]; then
        echo " Выход "
        exit
 else
 
+
+
+mkdir $BASE_DIR/backup_temp
+read -p "Введите дату выбранного бэкапа согласно маске YYYY-MM-DD: " date_back
+
+scp admin@92.63.102.118:/backups/${server}/backup-${date_back}.tar.gz $BASE_DIR/backup_temp/. &
 virtualenv /opt/projects/$proj
 source /opt/projects/$proj/bin/activate
 python -m pip install --upgrade pip
@@ -100,15 +102,6 @@ python3 enter12_setup.py $proj
 # Удаление django-admin из urls.py
 
 sed -i "/django-admin/d" /opt/projects/$proj/$proj/$proj/urls.py
-
-# Миграция 
-
-cd /opt/projects/$proj
-source bin/activate
-cd $proj
-python manage.py makemigrations
-python manage.py migrate
-cd $BASE_DIR
 
 deactivate
 
