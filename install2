@@ -18,6 +18,7 @@ if [[ "$proj" =~ ^[nN]$ ]]; then
        echo " Выход "
        exit
 else
+proj_lower=$(echo $proj | awk '{print tolower()}')
 
 
 
@@ -25,6 +26,11 @@ mkdir $BASE_DIR/backup_temp
 read -p "Введите дату выбранного бэкапа согласно маске YYYY-MM-DD: " date_back
 
 scp admin@92.63.102.118:~/backups/${server}/backup-${date_back}.tar.gz $BASE_DIR/backup_temp/. 
+
+cd $BASE_DIR/backup_temp
+tar zxf backup-${date_back}.tar.gz
+rm backup-${date_back}.tar.gz
+
 virtualenv /opt/projects/$proj
 source /opt/projects/$proj/bin/activate
 python -m pip install --upgrade pip
@@ -85,25 +91,23 @@ python3 $BASE_DIR/base_repack.py $proj
 # Копирование файлов бэкапа проекта в резерв
 
 cd $BASE_DIR/backup_temp
-tar zxf backup-${date_back}.tar.gz
-rm backup-${date_back}.tar.gz
 cp opt/backup/${proj}-${date_back}.dump /var/lib/postgresql/.
-command_psql="psql ${proj} < ${proj}-${date_back}.dump"
+command_psql="psql ${proj_lower} < ${proj}-${date_back}.dump"
 su - postgres -c "$command_psql"
 
 cp opt/backstatic/${proj}-static/* /opt/projects/${proj}/${proj}/website/static/website/css/.
 cp -r opt/backmedia/${proj}-media/* /opt/projects/${proj}/${proj}/media/.
+cd $BASE_DIR
+rm -r backup_temp
 
 
 # Смена урла админки
 
-python3 enter12_setup.py $proj
+python3 $BASE_DIR/enter12_setup.py $proj
 
 # Удаление django-admin из urls.py
 
 sed -i "/django-admin/d" /opt/projects/$proj/$proj/$proj/urls.py
-
-deactivate
 
 systemctl restart emperor.uwsgi.service
 systemctl restart nginx.service
